@@ -139,13 +139,102 @@ func verifyWxToken(tokenString string) (*WxClaims, error) {
 
 ## 部署
 
+### 生产环境部署
+
+**服务器要求**：
+- Go 1.22+
+- Redis 6.0+
+- 反向代理（Nginx/Caddy）
+
+**部署步骤**：
+
 ```bash
-# 编译
+# 1. 上传代码到服务器
+scp -r . user@server:/path/to/caiths-auth
+
+# 2. 配置环境变量
+cp .env.example .env
+# 编辑 .env 填入生产配置
+
+# 3. 编译
 go build -o caiths-auth main.go
 
-# 运行
-./caiths-auth
+# 4. 使用 systemd 管理服务
+sudo tee /etc/systemd/system/caiths-auth.service > /dev/null <<EOF
+[Unit]
+Description=Caiths Auth Service
+After=network.target redis.service
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/path/to/caiths-auth
+ExecStart=/path/to/caiths-auth/caiths-auth
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+# 5. 启动服务
+sudo systemctl daemon-reload
+sudo systemctl enable caiths-auth
+sudo systemctl start caiths-auth
 ```
+
+**Nginx 反向代理配置**：
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name auth.caiths.com;
+
+    ssl_certificate /path/to/cert.pem;
+    ssl_certificate_key /path/to/key.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:4000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### 本地开发
+
+```bash
+# 安装依赖
+go mod tidy
+
+# 运行
+go run main.go
+```
+
+## 环境变量
+
+| 变量 | 说明 | 默认值 |
+|------|------|--------|
+| `PORT` | 服务端口 | `4000` |
+| `REDIS_ADDR` | Redis 地址 | `localhost:6379` |
+| `REDIS_PASSWORD` | Redis 密码 | `` |
+| `REDIS_DB` | Redis 数据库编号 | `1` |
+| `WX_APP_ID` | 微信公众号 AppID | 必填 |
+| `WX_APP_SECRET` | 微信公众号 AppSecret | 必填 |
+| `WX_CALLBACK_URL` | 微信回调地址 | `SERVER_URL/wx/callback` |
+| `SERVER_URL` | 服务器地址 | 必填 |
+| `JWT_SECRET` | JWT 签名密钥 | 必填 |
+| `ALLOWED_ORIGINS` | CORS 白名单（逗号分隔） | 必填 |
+
+## 回调页面
+
+微信授权成功/失败后会显示一个精简的回调页面：
+- 采用黑白灰高质感设计，自动适配深色模式
+- 成功时自动关闭窗口（2秒后）
+- 失败时显示错误原因，需手动关闭
+- 响应式布局，移动端友好
 
 ## 安全说明
 
@@ -153,3 +242,4 @@ go build -o caiths-auth main.go
 - JWT 有效期 5 分钟，产品收到后应立即换成自己的 session
 - CORS 白名单控制允许的调用域名
 - Redis 使用独立 DB（默认 DB=1）避免冲突
+- 建议使用 HTTPS 部署，保护用户隐私

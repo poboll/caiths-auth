@@ -109,7 +109,11 @@ func handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	redirectURI := url.QueryEscape(env("SERVER_URL", "") + "/wx/callback")
+	callbackURL := env("WX_CALLBACK_URL", "")
+	if callbackURL == "" {
+		callbackURL = env("SERVER_URL", "") + "/wx/callback"
+	}
+	redirectURI := url.QueryEscape(callbackURL)
 	wxURL := fmt.Sprintf(
 		"https://open.weixin.qq.com/connect/oauth2/authorize?appid=%s&redirect_uri=%s&response_type=code&scope=snsapi_userinfo&state=%s#wechat_redirect",
 		env("WX_APP_ID", ""), redirectURI, pollKey,
@@ -125,14 +129,132 @@ func handleCallback(w http.ResponseWriter, r *http.Request) {
 	code := r.URL.Query().Get("code")
 	pollKey := r.URL.Query().Get("state")
 
-	htmlPage := func(msg string) {
+	htmlPage := func(title, desc string, isError bool) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		fmt.Fprintf(w, `<!DOCTYPE html><html><head><meta charset="utf-8"></head><body><script>window.close();</script><p>%s</p></body></html>`, msg)
+
+		icon := `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`
+		if isError {
+			icon = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>`
+		}
+
+		autoClose := ""
+		if !isError {
+			autoClose = `setTimeout(function(){ window.close(); }, 2000);`
+		}
+
+		html := `<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>%s</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%%23000'/></svg>" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%%23fff'/></svg>" media="(prefers-color-scheme: dark)">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --fg: #000000;
+            --border: #eaeaea;
+            --text-muted: #666666;
+            --icon-bg: #f5f5f5;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #000000;
+                --fg: #ffffff;
+                --border: #333333;
+                --text-muted: #a0a0a0;
+                --icon-bg: #1a1a1a;
+            }
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--fg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            -webkit-font-smoothing: antialiased;
+        }
+        .card {
+            width: 100%%;
+            max-width: 360px;
+            padding: 40px 32px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.04);
+        }
+        @media (prefers-color-scheme: dark) {
+            .card { box-shadow: 0 12px 40px rgba(0,0,0,0.2); }
+        }
+        .icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 24px;
+            border-radius: 50%%;
+            background: var(--icon-bg);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .icon svg {
+            width: 20px;
+            height: 20px;
+        }
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+        p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+        .btn {
+            appearance: none;
+            background: var(--fg);
+            color: var(--bg);
+            border: none;
+            padding: 0 16px;
+            height: 44px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            width: 100%%;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+        .btn:hover { opacity: 0.85; }
+        .btn:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">%s</div>
+        <h1>%s</h1>
+        <p>%s</p>
+        <button class="btn" onclick="window.close()">关闭窗口</button>
+    </div>
+    <script>
+        %s
+    </script>
+</body>
+</html>`
+		fmt.Fprintf(w, html, title, icon, title, desc, autoClose)
 	}
 
 	fail := func(reason string) {
 		markFailed(r.Context(), pollKey)
-		htmlPage("登录失败：" + reason)
+		htmlPage("登录失败", reason, true)
 	}
 
 	if code == "" || pollKey == "" {
@@ -169,7 +291,7 @@ func handleCallback(w http.ResponseWriter, r *http.Request) {
 	})
 	rdb.Set(r.Context(), pollKeyPrefix+pollKey, data, pollTTL)
 
-	htmlPage("授权成功，请返回页面继续操作。")
+	htmlPage("授权成功", "您已成功授权，请关闭此窗口并返回原应用继续操作。", false)
 }
 
 func handlePoll(w http.ResponseWriter, r *http.Request) {
