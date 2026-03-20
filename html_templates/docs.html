@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Documentation | Caiths Auth</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111'/><path d='M 65 35 A 25 25 0 1 0 65 65' fill='none' stroke='%23fff' stroke-width='12' stroke-linecap='round'/></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111'/><path d='M 65 35 A 22 22 0 1 0 65 65' fill='none' stroke='%23fff' stroke-width='14' stroke-linecap='round'/></svg>">
     <style>
         :root {
             --bg-color: #ffffff;
@@ -44,6 +44,23 @@
             -moz-osx-font-smoothing: grayscale;
             transition: background-color 0.3s ease, color 0.3s ease;
             position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100vh;
+            background-image: linear-gradient(var(--border-color) 1px, transparent 1px), linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center top;
+            opacity: 0.5;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            pointer-events: none;
+            z-index: -1;
         }
 
         /* Modal Styles */
@@ -328,7 +345,7 @@
         <div class="modal" id="modal-box">
             <svg viewBox="0 0 100 100">
                 <rect width="100" height="100" rx="20"/>
-                <path d="M 65 35 A 25 25 0 1 0 65 65" fill="none" stroke-width="12" stroke-linecap="round"/>
+                <path d="M 65 35 A 22 22 0 1 0 65 65" fill="none" stroke-width="14" stroke-linecap="round"/>
             </svg>
             <h2>Developer Portal</h2>
             <p>Enter your access code to view the Caiths Auth documentation.</p>

@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Caiths Auth | Unified Gateway</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111'/><path d='M 65 35 A 25 25 0 1 0 65 65' fill='none' stroke='%23fff' stroke-width='12' stroke-linecap='round'/></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111'/><path d='M 65 35 A 22 22 0 1 0 65 65' fill='none' stroke='%23fff' stroke-width='14' stroke-linecap='round'/></svg>">
     <style>
         :root {
             --bg-color: #ffffff;
@@ -60,8 +60,8 @@
             background-size: 40px 40px;
             background-position: center top;
             opacity: 0.5;
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 80%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
             pointer-events: none;
             z-index: -1;
         }
@@ -202,6 +202,85 @@
             background-color: var(--border-color);
         }
 
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            width: 100%;
+            margin-top: 80px;
+            animation: fade-in-up 0.8s ease-out 0.4s backwards;
+        }
+
+        .feature-card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            text-align: left;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.02);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--text-primary), var(--text-secondary));
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-btn-hover);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .feature-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 12px 0;
+            color: var(--text-primary);
+            letter-spacing: -0.01em;
+        }
+
+        .feature-card p {
+            font-size: 0.9375rem;
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.6;
+        }
+
         footer {
             padding: 40px 0;
             text-align: center;
@@ -222,7 +301,7 @@
             <a href="/" class="logo">
                 <svg viewBox="0 0 100 100">
                     <rect width="100" height="100" rx="20"/>
-                    <path d="M 65 35 A 25 25 0 1 0 65 65" fill="none" stroke-width="12" stroke-linecap="round"/>
+                    <path d="M 65 35 A 22 22 0 1 0 65 65" fill="none" stroke-width="14" stroke-linecap="round"/>
                 </svg>
                 Caiths
             </a>
@@ -236,6 +315,30 @@
         <div class="actions">
             <a href="/docs" class="btn btn-primary">View Documentation</a>
             <a href="mailto:support@caiths.com" class="btn btn-secondary">Contact Sales</a>
+        </div>
+
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                </div>
+                <h3>Bank-grade Security</h3>
+                <p>Enterprise-level encryption and secure token management built into the core. Your users' identity is protected at every layer.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                </div>
+                <h3>Universal Identity</h3>
+                <p>One unified gateway for all your products. Seamlessly connect WeChat ecosystem across your entire network of applications.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                </div>
+                <h3>Developer First</h3>
+                <p>Clean APIs, robust SDKs, and comprehensive documentation. Integrated in minutes with zero friction and maximum control.</p>
+            </div>
         </div>
     </main>
 

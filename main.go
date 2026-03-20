@@ -180,8 +180,8 @@ func handleCallback(w http.ResponseWriter, r *http.Request) {
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>%s</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%%23000'/></svg>" media="(prefers-color-scheme: light)">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%%23fff'/></svg>" media="(prefers-color-scheme: dark)">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%%23000'/><path d='M 65 35 A 22 22 0 1 0 65 65' fill='none' stroke='%%23fff' stroke-width='14' stroke-linecap='round'/></svg>" media="(prefers-color-scheme: light)">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%%23fff'/><path d='M 65 35 A 22 22 0 1 0 65 65' fill='none' stroke='%%23000' stroke-width='14' stroke-linecap='round'/></svg>" media="(prefers-color-scheme: dark)">
     <style>
         :root {
             --bg: #ffffff;
@@ -210,6 +210,23 @@ func handleCallback(w http.ResponseWriter, r *http.Request) {
             min-height: 100vh;
             padding: 20px;
             -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100vh;
+            background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center top;
+            opacity: 0.5;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            pointer-events: none;
+            z-index: -1;
         }
         .card {
             width: 100%%;
