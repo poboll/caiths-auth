@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation | Caiths Auth</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23111'/><path d='M 65 35 A 25 25 0 1 0 65 65' fill='none' stroke='%23fff' stroke-width='12' stroke-linecap='round'/></svg>">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #111111;
+            --text-secondary: #666666;
+            --border-color: #eaeaea;
+            --btn-bg: #000000;
+            --btn-text: #ffffff;
+            --btn-hover: #333333;
+            --error-color: #e00;
+            --glass-bg: rgba(255, 255, 255, 0.8);
+            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #000000;
+                --text-primary: #ededed;
+                --text-secondary: #a1a1a1;
+                --border-color: #333333;
+                --btn-bg: #ffffff;
+                --btn-text: #000000;
+                --btn-hover: #cccccc;
+                --glass-bg: rgba(0, 0, 0, 0.8);
+                --shadow-lg: 0 20px 40px -10px rgba(255, 255, 255, 0.05);
+            }
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            position: relative;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            transition: opacity 0.5s ease;
+            padding: 24px;
+        }
+
+        .modal-overlay::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100vh;
+            background-image: linear-gradient(var(--border-color) 1px, transparent 1px), linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center top;
+            opacity: 0.5;
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .modal {
+            width: 100%;
+            max-width: 380px;
+            padding: 48px 40px;
+            border-radius: 20px;
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            animation: fade-in-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            box-sizing: border-box;
+        }
+
+        .modal svg {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto 24px auto;
+        }
+        .modal svg rect { fill: var(--text-primary); }
+        .modal svg path { stroke: var(--bg-color); }
+
+        .modal h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0 0 12px 0;
+            letter-spacing: -0.02em;
+        }
+
+        .modal p {
+            color: var(--text-secondary);
+            margin: 0 0 32px 0;
+            font-size: 0.9375rem;
+            line-height: 1.5;
+        }
+
+        .input-group {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .input-field {
+            width: 100%;
+            height: 48px;
+            padding: 0 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+            box-sizing: border-box;
+            text-align: center;
+            letter-spacing: 0.2em;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 1px var(--text-primary);
+        }
+
+        .input-field::placeholder {
+            color: var(--text-secondary);
+            letter-spacing: normal;
+            opacity: 0.5;
+        }
+
+        .btn {
+            width: 100%;
+            height: 48px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            background-color: var(--btn-bg);
+            color: var(--btn-text);
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .btn:hover {
+            background-color: var(--btn-hover);
+        }
+
+        .btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            color: var(--error-color);
+            font-size: 0.875rem;
+            min-height: 20px;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            margin-top: -8px;
+        }
+
+        .error-message.visible {
+            opacity: 1;
+        }
+
+        .shake {
+            animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* Docs Content Styles */
+        .docs-layout {
+            display: none; /* Initially hidden */
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .docs-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background-color: var(--glass-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 600;
+            font-size: 1.125rem;
+            letter-spacing: -0.01em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-primary);
+        }
+
+        .logo svg {
+            width: 24px;
+            height: 24px;
+        }
+        .logo svg rect { fill: var(--text-primary); }
+        .logo svg path { stroke: var(--bg-color); }
+
+        .docs-nav {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .docs-nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+        
+        .docs-nav a:hover {
+            color: var(--text-primary);
+        }
+
+        .docs-content {
+            flex: 1;
+            max-width: 760px;
+            margin: 0 auto;
+            padding: 80px 24px;
+            width: 100%;
+            box-sizing: border-box;
+            opacity: 0;
+            animation: fade-in-up 0.8s ease-out forwards;
+        }
+
+        .prose {
+            font-size: 1.0625rem;
+            line-height: 1.75;
+            color: var(--text-primary);
+        }
+
+        .prose h1, .prose h2, .prose h3, .prose h4 {
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-top: 2em;
+            margin-bottom: 1em;
+            color: var(--text-primary);
+        }
+
+        .prose h1 { font-size: 2.5rem; margin-top: 0; letter-spacing: -0.03em; line-height: 1.2;}
+        .prose h2 { font-size: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5em; }
+        .prose h3 { font-size: 1.25rem; }
+
+        .prose p { margin-top: 1.25em; margin-bottom: 1.25em; color: var(--text-secondary); }
+        .prose strong { color: var(--text-primary); }
+        .prose a { color: var(--text-primary); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+        .prose a:hover { opacity: 0.8; }
+        
+        .prose code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.875em;
+            padding: 0.2em 0.4em;
+            background: var(--border-color);
+            border-radius: 4px;
+            color: var(--text-primary);
+        }
+        
+        .prose pre {
+            background: var(--border-color);
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 2em 0;
+            border: 1px solid var(--border-color);
+        }
+        
+        .prose pre code {
+            background: transparent;
+            padding: 0;
+            font-size: 0.875em;
+            color: var(--text-primary);
+            border-radius: 0;
+        }
+        
+        .prose blockquote {
+            border-left: 3px solid var(--text-primary);
+            margin: 2em 0;
+            padding-left: 1.25em;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        @keyframes fade-in-up {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Modal State -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal-box">
+            <svg viewBox="0 0 100 100">
+                <rect width="100" height="100" rx="20"/>
+                <path d="M 65 35 A 25 25 0 1 0 65 65" fill="none" stroke-width="12" stroke-linecap="round"/>
+            </svg>
+            <h2>Developer Portal</h2>
+            <p>Enter your access code to view the Caiths Auth documentation.</p>
+            
+            <form id="auth-form">
+                <div class="input-group">
+                    <input type="password" id="access-code" class="input-field" placeholder="Access Code" autocomplete="off" required>
+                    <div class="error-message" id="error-message">Invalid access code.</div>
+                    <button type="submit" class="btn" id="submit-btn">Enter Portal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Docs State -->
+    <div class="docs-layout" id="docs-layout">
+        <header class="docs-header">
+            <a href="/" class="logo">
+                <svg viewBox="0 0 100 100">
+                    <rect width="100" height="100" rx="20"/>
+                    <path d="M 65 35 A 25 25 0 1 0 65 65" fill="none" stroke-width="12" stroke-linecap="round"/>
+                </svg>
+                Caiths Auth
+            </a>
+            <nav class="docs-nav">
+                <a href="/">← Back to Home</a>
+            </nav>
+        </header>
+        
+        <main class="docs-content">
+            <div class="prose" id="content-body">
+                <!-- Content injected here via JS -->
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('auth-form');
+            const input = document.getElementById('access-code');
+            const errorMsg = document.getElementById('error-message');
+            const modalOverlay = document.getElementById('modal-overlay');
+            const modalBox = document.getElementById('modal-box');
+            const docsLayout = document.getElementById('docs-layout');
+            const contentBody = document.getElementById('content-body');
+            const submitBtn = document.getElementById('submit-btn');
+
+            input.focus();
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const code = input.value.trim();
+                
+                // Reset errors
+                errorMsg.classList.remove('visible');
+                modalBox.classList.remove('shake');
+                
+                if (code === '123456') {
+                    const originalText = submitBtn.textContent;
+                    submitBtn.textContent = 'Verifying...';
+                    submitBtn.disabled = true;
+                    
+                    try {
+                        let contentHtml = '';
+                        try {
+                            // Try to fetch real content
+                            const res = await fetch('/api/docs/content');
+                            if (res.ok) {
+                                contentHtml = marked.parse(await res.text());
+                            } else {
+                                throw new Error('API returned ' + res.status);
+                            }
+                        } catch(err) {
+                            // Fallback mock content if API isn't ready
+                            await new Promise(resolve => setTimeout(resolve, 600));
+                            contentHtml = `
+                                <h1>Caiths Auth SDK Guide</h1>
+                                <p>Welcome to the developer documentation for Caiths Auth. This guide will help you integrate our unified authentication gateway into your services securely and efficiently.</p>
+                                
+                                <h2>Getting Started</h2>
+                                <p>To begin, you need to configure your service to point to the authentication endpoint. Ensure your API keys are stored securely in your environment variables.</p>
+                                
+                                <pre><code>// Example Go Integration
+import "github.com/caiths/auth-sdk-go"
+
+func main() {
+    client := caithsauth.NewClient(os.Getenv("CAITHS_API_KEY"))
+    
+    // Initialize your service securely
+    if err := client.VerifyConnection(); err != nil {
+        log.Fatal("Auth verification failed:", err)
+    }
+}</code></pre>
+                                
+                                <blockquote>Security is not an afterthought. It is the foundation of the Caiths network. Always validate tokens server-side.</blockquote>
+                                
+                                <h2>Authentication Flow</h2>
+                                <p>The standard flow uses OAuth 2.0 with OIDC for identity verification. When an unauthenticated user navigates to your application, redirect them to the centralized gateway at <code>/auth/login</code>.</p>
+                                
+                                <p>Upon successful authentication, the gateway will redirect back to your specified callback URL with a short-lived authorization code.</p>
+                            `;
+                        }
+                        
+                        // Transition
+                        modalOverlay.style.opacity = '0';
+                        setTimeout(() => {
+                            modalOverlay.style.display = 'none';
+                            contentBody.innerHTML = contentHtml;
+                            docsLayout.style.display = 'flex';
+                        }, 500);
+                        
+                    } catch (err) {
+                        submitBtn.textContent = originalText;
+                        submitBtn.disabled = false;
+                        showError('Connection error. Please try again.');
+                    }
+                } else {
+                    showError('Invalid access code.');
+                }
+            });
+
+            function showError(msg) {
+                errorMsg.textContent = msg;
+                errorMsg.classList.add('visible');
+                // reflow trick to restart animation
+                modalBox.classList.remove('shake');
+                void modalBox.offsetWidth;
+                modalBox.classList.add('shake');
+                input.value = '';
+                input.focus();
+            }
+        });
+    </script>
+</body>
+</html>

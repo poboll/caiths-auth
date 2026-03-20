@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,6 +19,15 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 )
+
+//go:embed html_templates/index.html
+var indexHTML []byte
+
+//go:embed html_templates/docs.html
+var docsHTML []byte
+
+//go:embed docs/AUTH_INTEGRATION_GUIDE.md
+var docsContent []byte
 
 type wxTokenResp struct {
 	AccessToken string `json:"access_token"`
@@ -63,6 +73,9 @@ func main() {
 	})
 
 	mux := http.NewServeMux()
+	mux.HandleFunc("GET /", handleIndex)
+	mux.HandleFunc("GET /docs", handleDocs)
+	mux.HandleFunc("GET /api/docs/content", handleDocsContent)
 	mux.HandleFunc("GET /health", handleHealth)
 	mux.HandleFunc("GET /wx/login", handleLogin)
 	mux.HandleFunc("GET /wx/callback", handleCallback)
@@ -98,6 +111,25 @@ func corsMiddleware(next http.Handler) http.Handler {
 
 func handleHealth(w http.ResponseWriter, _ *http.Request) {
 	writeJSON(w, http.StatusOK, map[string]string{"status": "ok"})
+}
+
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write(indexHTML)
+}
+
+func handleDocs(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write(docsHTML)
+}
+
+func handleDocsContent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/markdown; charset=utf-8")
+	w.Write(docsContent)
 }
 
 func handleLogin(w http.ResponseWriter, r *http.Request) {
