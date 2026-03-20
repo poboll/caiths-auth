@@ -71,6 +71,8 @@ go run main.go
 
 ## 产品接入
 
+更正式的对外接入说明见 `docs/AUTH_INTEGRATION_GUIDE.md`。
+
 ### 1. 共享 JWT_SECRET
 
 将 `caiths-auth` 的 `JWT_SECRET` 配置到产品的 `.env` 中。
