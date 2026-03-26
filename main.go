@@ -223,8 +223,8 @@ func handleCallback(w http.ResponseWriter, r *http.Request) {
             background-size: 40px 40px;
             background-position: center top;
             opacity: 0.5;
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
-            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%);
+            mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%%, rgba(0,0,0,0) 100%%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%%, rgba(0,0,0,0) 100%%);
             pointer-events: none;
             z-index: -1;
         }
